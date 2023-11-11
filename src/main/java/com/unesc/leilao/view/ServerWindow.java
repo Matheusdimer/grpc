@@ -37,7 +37,6 @@ public class ServerWindow extends JFrame {
 
         MessageConsole messageConsole = new MessageConsole(logPane);
         messageConsole.redirectOut();
-        messageConsole.redirectErr();
         messageConsole.setMessageLines(20);
 
         table.setModel(tableModel);
