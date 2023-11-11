@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.unesc.leilao.proto";
+option java_outer_classname = "LeilaoProto";
+
+package proto;
+
+service Leilao {
+  rpc login(Usuario) returns (APIResponse) {}
+
+  rpc getProdutos(EmptyRequest) returns (stream Produto) {}
+
+  rpc fazerLance(Lance) returns (APIResponse) {}
+
+  rpc listenLances(EmptyRequest) returns (stream NotificacaoLance) {}
+
+  rpc listenProdutosVendidos(EmptyRequest) returns (stream NotificacaoProdutoVendido) {}
+}
+
+message EmptyRequest {}
+
+message Produto {
+  string descricao = 1;
+  double valorMinimo = 2;
+}
+
+message Lance {
+  Produto produto = 1;
+  double valor = 2;
+}
+
+message APIResponse {
+  bool ok = 1;
+  optional string message = 2;
+}
+
+message Usuario {
+  string username = 1;
+}
+
+message NotificacaoLance {
+  string usuario = 1;
+  Lance lance = 2;
+}
+
+message NotificacaoProdutoVendido {
+  string usuario = 1;
+  Produto produto = 2;
+  double valor = 3;
+}
