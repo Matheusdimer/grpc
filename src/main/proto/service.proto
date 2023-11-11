@@ -13,7 +13,7 @@ service Leilao {
 
   rpc fazerLance(Lance) returns (APIResponse) {}
 
-  rpc listenLances(EmptyRequest) returns (stream NotificacaoLance) {}
+  rpc listenLances(EmptyRequest) returns (stream Lance) {}
 
   rpc listenProdutosVendidos(EmptyRequest) returns (stream NotificacaoProdutoVendido) {}
 }
@@ -28,6 +28,7 @@ message Produto {
 message Lance {
   Produto produto = 1;
   double valor = 2;
+  string usuario = 3;
 }
 
 message APIResponse {
@@ -37,11 +38,6 @@ message APIResponse {
 
 message Usuario {
   string username = 1;
-}
-
-message NotificacaoLance {
-  string usuario = 1;
-  Lance lance = 2;
 }
 
 message NotificacaoProdutoVendido {
