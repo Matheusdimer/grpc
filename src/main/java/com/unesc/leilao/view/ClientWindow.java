@@ -2,7 +2,7 @@ package com.unesc.leilao.view;
 
 import javax.swing.*;
 
-public class ClientWIndow {
+public class ClientWindow {
     private JTextField usernameTextField;
     private JButton entrarButton;
     private JTable table1;
