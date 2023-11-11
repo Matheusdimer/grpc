@@ -3,7 +3,7 @@ package com.unesc.leilao.view;
 import com.unesc.leilao.controller.LeilaoController;
 import com.unesc.leilao.proto.Lance;
 import com.unesc.leilao.proto.Produto;
-import com.unesc.leilao.util.ProtoUtils;
+import com.unesc.leilao.util.TableUtils;
 import com.unesc.leilao.view.components.MessageConsole;
 
 import javax.swing.*;
@@ -12,13 +12,11 @@ import javax.swing.text.NumberFormatter;
 import java.awt.event.ActionEvent;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
+import static com.unesc.leilao.util.TableUtils.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ServerWindow extends JFrame {
-
-    private static final String EMPTY_CELL_VALUE = "---";
 
     private JPanel panel;
     private JTable table;
@@ -26,17 +24,7 @@ public class ServerWindow extends JFrame {
     private JTextField valorField;
     private JButton cadastrarProdutoButton;
     private JTextPane logPane;
-    private final NumberFormat currency = NumberFormat.getCurrencyInstance();
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-    private final DefaultTableModel tableModel = new DefaultTableModel(new Object[] {
-            "Identificador",
-            "Descrição",
-            "Data do cadastro",
-            "Lance mínimo",
-            "Último lance",
-            "Usuário",
-            "Data do lance"
-    }, 0);
+    private final DefaultTableModel tableModel = new DefaultTableModel(PRODUTO_COLUMNS, 0);
     private final LeilaoController controller = LeilaoController.getInstance();
 
     public ServerWindow() {
@@ -97,7 +85,7 @@ public class ServerWindow extends JFrame {
             int id = (int) tableModel.getValueAt(i, 0);
 
             if (produtoId == id) {
-                LocalDateTime dateTime = ProtoUtils.toDateTime(lance.getDatetime());
+                LocalDateTime dateTime = LocalDateTime.parse(lance.getDatetime());
                 tableModel.setValueAt(currency.format(lance.getValor()), i, 4);
                 tableModel.setValueAt(lance.getUsuario(), i, 5);
                 tableModel.setValueAt(dateTimeFormatter.format(dateTime), i, 6);
@@ -107,22 +95,6 @@ public class ServerWindow extends JFrame {
     }
 
     private void onProdutoCadastrado(Produto produto) {
-        tableModel.addRow(buildRow(produto));
-    }
-
-    public Object[] buildRow(Produto produto) {
-        boolean hasUltimoLance = produto.hasUltimoLance();
-
-        return new Object[] {
-                produto.getId(),
-                produto.getDescricao(),
-                dateTimeFormatter.format(ProtoUtils.toDateTime(produto.getDatetime())),
-                currency.format(produto.getValorMinimo()),
-                hasUltimoLance ? currency.format(produto.getUltimoLance().getValor()) : EMPTY_CELL_VALUE,
-                hasUltimoLance ? produto.getUltimoLance().getUsuario() : EMPTY_CELL_VALUE,
-                hasUltimoLance
-                        ? dateTimeFormatter.format(ProtoUtils.toDateTime(produto.getUltimoLance().getDatetime()))
-                        : EMPTY_CELL_VALUE,
-        };
+        tableModel.addRow(TableUtils.getProdutoColumns(produto));
     }
 }
