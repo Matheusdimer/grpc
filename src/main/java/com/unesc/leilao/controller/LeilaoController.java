@@ -5,9 +5,13 @@ import com.unesc.leilao.proto.NotificacaoProdutoVendido;
 import com.unesc.leilao.proto.Produto;
 import com.unesc.leilao.proto.Usuario;
 import io.grpc.stub.StreamObserver;
+import org.apache.commons.lang3.function.Consumers;
 
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public class LeilaoController {
@@ -19,6 +23,12 @@ public class LeilaoController {
     private final Map<String, UsuarioConectado> usuariosConectados = new ConcurrentHashMap<>();
 
     private final Map<Integer, Produto> produtos = new ConcurrentHashMap<>();
+
+    private Consumer<Produto> onProdutoCadastrado = Consumers.nop();
+
+    private Consumer<Lance> onLance = Consumers.nop();
+
+    private Consumer<Produto> onProdutoVendido = Consumers.nop();
 
 
     public static LeilaoController getInstance() {
@@ -35,7 +45,11 @@ public class LeilaoController {
 
     public void cadastrarProduto(Produto produto) {
         int id = produtos.size() + 1;
-        produtos.put(id, produto.toBuilder().setId(id).build());
+        produto = produto.toBuilder()
+                .setId(id)
+                .setDatetime(LocalDateTime.now().toString())
+                .build();
+        produtos.put(id, produto);
         notificarProdutoCadastrado(produto);
         logger.info("Produto " + produto.getDescricao() + " cadastrado");
     }
@@ -52,17 +66,20 @@ public class LeilaoController {
 
     public void notificarProdutoCadastrado(Produto produto) {
         usuariosConectados.forEach((username, usuarioConectado) ->
-                usuarioConectado.getProdutosStream().onNext(produto));
+                notifyObserver(usuarioConectado.getProdutosStream(), produto));
+        CompletableFuture.runAsync(() -> onProdutoCadastrado.accept(produto));
     }
 
     public synchronized void notificarLance(Lance lance) {
         usuariosConectados.forEach((username, usuarioConectado) ->
-                usuarioConectado.getNotificacaoLanceStream().onNext(lance));
+                notifyObserver(usuarioConectado.getNotificacaoLanceStream(), lance));
+        CompletableFuture.runAsync(() -> onLance.accept(lance));
     }
 
     public synchronized void notificarProdutoVendido(NotificacaoProdutoVendido notificacaoProdutoVendido) {
         usuariosConectados.forEach((username, usuarioConectado) ->
-                usuarioConectado.getNotificacaoProdutoVendidoStream().onNext(notificacaoProdutoVendido));
+                notifyObserver(usuarioConectado.getNotificacaoProdutoVendidoStream(), notificacaoProdutoVendido));
+        CompletableFuture.runAsync(() -> onProdutoVendido.accept(notificacaoProdutoVendido.getProduto()));
     }
 
     public void getProdutos(Usuario usuario, StreamObserver<Produto> responseObserver) {
@@ -97,9 +114,27 @@ public class LeilaoController {
         System.err.println("Conexões encerradas");
     }
 
+    private <T> void notifyObserver(StreamObserver<T> streamObserver, T value) {
+        if (streamObserver != null) {
+            streamObserver.onNext(value);
+        }
+    }
+
     private void closeConnection(StreamObserver<?> streamObserver) {
         if (streamObserver != null) {
             streamObserver.onCompleted();
         }
+    }
+
+    public void setOnProdutoCadastrado(Consumer<Produto> onProdutoCadastrado) {
+        this.onProdutoCadastrado = onProdutoCadastrado;
+    }
+
+    public void setOnLance(Consumer<Lance> onLance) {
+        this.onLance = onLance;
+    }
+
+    public void setOnProdutoVendido(Consumer<Produto> onProdutoVendido) {
+        this.onProdutoVendido = onProdutoVendido;
     }
 }

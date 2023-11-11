@@ -1,7 +1,7 @@
 package com.unesc.leilao.proto;
 
 import com.unesc.leilao.controller.LeilaoController;
-import com.unesc.leilao.controller.Response;
+import com.unesc.leilao.util.Response;
 import io.grpc.stub.StreamObserver;
 
 import java.util.logging.Logger;

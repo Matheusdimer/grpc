@@ -26,12 +26,14 @@ message Produto {
   double valorMinimo = 3;
   optional Lance ultimoLance = 4;
   bool vendido = 5;
+  string datetime = 6;
 }
 
 message Lance {
   Produto produto = 1;
   double valor = 2;
   string usuario = 3;
+  string datetime = 4;
 }
 
 message APIResponse {

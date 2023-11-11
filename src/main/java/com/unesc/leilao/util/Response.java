@@ -1,4 +1,4 @@
-package com.unesc.leilao.controller;
+package com.unesc.leilao.util;
 
 import com.unesc.leilao.proto.APIResponse;
 

@@ -29,14 +29,6 @@
         </constraints>
         <properties/>
       </component>
-      <component id="15d04" class="javax.swing.JTextField" binding="valorField">
-        <constraints>
-          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
-        </constraints>
-        <properties/>
-      </component>
       <component id="22c40" class="javax.swing.JButton" binding="cadastrarProdutoButton" default-binding="true">
         <constraints>
           <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -61,7 +53,7 @@
           <text value="Lance mínimo:"/>
         </properties>
       </component>
-      <scrollpane id="b5234" binding="logScrollPane">
+      <scrollpane id="b5234">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
             <minimum-size width="-1" height="100"/>
@@ -76,6 +68,14 @@
           </component>
         </children>
       </scrollpane>
+      <component id="619b" class="javax.swing.JFormattedTextField" binding="valorField" custom-create="true">
+        <constraints>
+          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="-1"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
     </children>
   </grid>
 </form>
