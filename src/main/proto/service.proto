@@ -9,6 +9,8 @@ package proto;
 service Leilao {
   rpc login(Usuario) returns (APIResponse) {}
 
+  rpc logout(Usuario) returns (APIResponse) {}
+
   rpc getProdutos(Usuario) returns (stream Produto) {}
 
   rpc fazerLance(Lance) returns (APIResponse) {}
