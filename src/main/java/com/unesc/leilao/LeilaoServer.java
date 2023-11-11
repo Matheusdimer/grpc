@@ -1,6 +1,9 @@
 package com.unesc.leilao;
 
+import com.unesc.leilao.controller.LeilaoController;
 import com.unesc.leilao.proto.LeilaoService;
+import com.unesc.leilao.proto.Produto;
+import com.unesc.leilao.view.ServerWindow;
 import io.grpc.Grpc;
 import io.grpc.InsecureServerCredentials;
 import io.grpc.Server;
@@ -36,6 +39,7 @@ public class LeilaoServer {
 
     private void stop() throws InterruptedException {
         if (server != null) {
+            LeilaoController.getInstance().closeAllConnections();
             server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
         }
     }
@@ -53,6 +57,7 @@ public class LeilaoServer {
      * Main launches the server from the command line.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
+        new ServerWindow();
         final LeilaoServer server = new LeilaoServer();
         server.start();
         server.blockUntilShutdown();
