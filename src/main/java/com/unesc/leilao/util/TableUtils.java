@@ -20,7 +20,8 @@ public class TableUtils {
             "Lance mínimo",
             "Último lance",
             "Usuário",
-            "Data do lance"
+            "Data do lance",
+            "Vendido?"
     };
 
     public static Object[] getProdutoColumns(Produto produto) {
@@ -38,6 +39,7 @@ public class TableUtils {
                 hasUltimoLance
                         ? dateTimeFormatter.format(LocalDateTime.parse(produto.getUltimoLance().getDatetime()))
                         : EMPTY_CELL_VALUE,
+                produto.getVendido() ? "Sim" : "Não"
         };
     }
 }
