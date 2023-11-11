@@ -9,20 +9,23 @@ package proto;
 service Leilao {
   rpc login(Usuario) returns (APIResponse) {}
 
-  rpc getProdutos(EmptyRequest) returns (stream Produto) {}
+  rpc getProdutos(Usuario) returns (stream Produto) {}
 
   rpc fazerLance(Lance) returns (APIResponse) {}
 
-  rpc listenLances(EmptyRequest) returns (stream Lance) {}
+  rpc listenLances(Usuario) returns (stream Lance) {}
 
-  rpc listenProdutosVendidos(EmptyRequest) returns (stream NotificacaoProdutoVendido) {}
+  rpc listenProdutosVendidos(Usuario) returns (stream NotificacaoProdutoVendido) {}
 }
 
 message EmptyRequest {}
 
 message Produto {
-  string descricao = 1;
-  double valorMinimo = 2;
+  uint32 id = 1;
+  string descricao = 2;
+  double valorMinimo = 3;
+  optional Lance ultimoLance = 4;
+  bool vendido = 5;
 }
 
 message Lance {

@@ -1,36 +1,45 @@
 package com.unesc.leilao.proto;
 
+import com.unesc.leilao.controller.LeilaoController;
+import com.unesc.leilao.controller.Response;
 import io.grpc.stub.StreamObserver;
 
-public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
-//    @Override
-//    public void getProdutos(Empty request, StreamObserver<Produto> responseObserver) {
-//        Produto produto = Produto.newBuilder()
-//                .setDescricao("Teste")
-//                .setValorMinimo(50)
-//                .build();
-//        responseObserver.onNext(produto);
-//        responseObserver.onCompleted();
-//    }
+import java.util.logging.Logger;
 
+public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
+
+    private static final Logger logger = Logger.getLogger(LeilaoService.class.getName());
+
+    private final LeilaoController controller = LeilaoController.getInstance();
 
     @Override
-    public void getProdutos(EmptyRequest request, StreamObserver<Produto> responseObserver) {
-        int i = 1;
+    public void login(Usuario request, StreamObserver<APIResponse> responseObserver) {
+        String message = "Usuário " + request.getUsername() + " conectado";
+        controller.adicionarUsuario(request.getUsername());
+        responseObserver.onNext(Response.ok(message));
+        responseObserver.onCompleted();
+        logger.info(message);
+    }
 
-        while (true) {
-            Produto produto = Produto.newBuilder()
-                .setDescricao("Produto " + i)
-                .setValorMinimo(50 + i)
-                .build();
-            responseObserver.onNext(produto);
-            i++;
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                responseObserver.onCompleted();
-                throw new RuntimeException(e);
-            }
-        }
+    @Override
+    public void getProdutos(Usuario request, StreamObserver<Produto> responseObserver) {
+        controller.getProdutos(request, responseObserver);
+    }
+
+    @Override
+    public void fazerLance(Lance request, StreamObserver<APIResponse> responseObserver) {
+        controller.fazerLance(request);
+        responseObserver.onNext(Response.ok("Lance registrado com sucesso."));
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void listenLances(Usuario request, StreamObserver<Lance> responseObserver) {
+        controller.registrarListenerLances(request, responseObserver);
+    }
+
+    @Override
+    public void listenProdutosVendidos(Usuario request, StreamObserver<NotificacaoProdutoVendido> responseObserver) {
+        controller.registrarListenerProdutosVendidos(request, responseObserver);
     }
 }
