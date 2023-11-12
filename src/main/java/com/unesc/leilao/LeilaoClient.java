@@ -1,10 +1,13 @@
 package com.unesc.leilao;
 
-import com.unesc.leilao.proto.LeilaoGrpc;
+import com.unesc.leilao.proto.*;
+import com.unesc.leilao.view.ClientWindow;
 import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
 
+import javax.swing.*;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -21,12 +24,10 @@ public class LeilaoClient {
     }
 
     public static void main(String[] args) throws Exception {
+
+        String target = JOptionPane.showInputDialog("Informe o endereço do servidor:");
         LeilaoGrpc.LeilaoBlockingStub blockingStub = buildClient();
 
-        try {
-            // TODO ponto de partida
-        } finally {
-            ((ManagedChannel) blockingStub.getChannel()).shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-        }
+        ClientWindow clientWindow = new ClientWindow(blockingStub);
     }
 }
