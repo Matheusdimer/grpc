@@ -41,8 +41,16 @@ public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
 
     @Override
     public void fazerLance(Lance request, StreamObserver<APIResponse> responseObserver) {
-        if (request.getValor() < request.getProduto().getValorMinimo()) {
+        Produto produto = controller.getProduto(request.getProduto().getId());
+
+        if (request.getValor() < produto.getValorMinimo()) {
             responseObserver.onNext(Response.notOk("Lance não atingiu o valor mínimo"));
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if (produto.hasUltimoLance() && request.getValor() < produto.getUltimoLance().getValor()) {
+            responseObserver.onNext(Response.notOk("Lance deve ter um valor maior que o último lance"));
             responseObserver.onCompleted();
             return;
         }

@@ -64,6 +64,10 @@ public class LeilaoController {
         return usuariosConectados.get(username);
     }
 
+    public Produto getProduto(int id) {
+        return produtos.get(id);
+    }
+
     public void cadastrarProduto(Produto produto) {
         int id = produtos.size() + 1;
         produto = produto.toBuilder()
