@@ -17,16 +17,15 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.unesc.leilao.util.TableUtils.*;
 
-public class ClientWindow extends JFrame{
+public class ClientWindow extends JFrame {
     private JPanel panel;
     private JTextField usernameTextField;
-    private JButton entrarButton ;
+    private JButton entrarButton;
     private JTable table1;
     private JComboBox<Produto> produtosCombo;
     private JButton lanceButton;
     private JTextArea logArea;
     private JFormattedTextField valorTextField;
-
 
     private final DefaultComboBoxModel<Produto> comboBoxModel = new DefaultComboBoxModel<>();
 
@@ -37,6 +36,7 @@ public class ClientWindow extends JFrame{
     private Usuario usuario;
 
     private Lance lance;
+
     public ClientWindow(LeilaoGrpc.LeilaoBlockingStub blockingStub) {
         this.blockingStub = blockingStub;
         setContentPane(panel);
@@ -71,7 +71,7 @@ public class ClientWindow extends JFrame{
             public void windowClosing(WindowEvent e) {
                 try {
                     APIResponse logout = blockingStub.logout(usuario);
-                    if (!logout.getOk()){
+                    if (!logout.getOk()) {
                         JOptionPane.showMessageDialog(ClientWindow.this, "Erro ao desconectar usuário. Por favor tente novamente!");
                     }
                 } finally {
@@ -94,39 +94,40 @@ public class ClientWindow extends JFrame{
             Produto selectedItem = (Produto) comboBoxModel.getSelectedItem();
             String valorLance = valorTextField.getText().replaceAll("\\.", "");
 
-                if (valorLance.isEmpty()) {
-                    JOptionPane.showMessageDialog(ClientWindow.this, "Por favor, preencha um valor para o seu lance.");
+            if (valorLance.isEmpty()) {
+                JOptionPane.showMessageDialog(ClientWindow.this, "Por favor, preencha um valor para o seu lance.");
+                return;
+            }
+
+            lance = Lance.newBuilder()
+                    .setProduto(selectedItem)
+                    .setValor(Integer.parseInt(valorLance))
+                    .setUsuario(usuario.getUsername())
+                    .setDatetime(LocalDateTime.now().toString())
+                    .build();
+
+            CompletableFuture.runAsync(() -> {
+                APIResponse lanceResponse = blockingStub.fazerLance(lance);
+
+                if (!lanceResponse.getOk()) {
+                    JOptionPane.showMessageDialog(ClientWindow.this, lanceResponse.getMessage());
                     return;
                 }
+                JOptionPane.showMessageDialog(ClientWindow.this, "Lance realizado com sucesso!");
 
-                lance = Lance.newBuilder()
-                        .setProduto(selectedItem)
-                        .setValor(Integer.parseInt(valorLance))
-                        .setUsuario(usuario.getUsername())
-                        .setDatetime(LocalDateTime.now().toString())
-                        .build();
-
-                CompletableFuture.runAsync(() -> {
-                    APIResponse lanceResponse = blockingStub.fazerLance(lance);
-
-                    if (!lanceResponse.getOk()) {
-                        JOptionPane.showMessageDialog(ClientWindow.this, lanceResponse.getMessage());
-                        return;
-                    }
-                    JOptionPane.showMessageDialog(ClientWindow.this, "Lance realizado com sucesso!");
-
-                });
+            });
         });
 
 
     }
+
     public String getUsername() {
         return usernameTextField.getText();
     }
 
     private void fazerLogin(Usuario usuario) {
         APIResponse login = blockingStub.login(usuario);
-        if (!login.getOk()){
+        if (!login.getOk()) {
             JOptionPane.showMessageDialog(this, login.getMessage());
             return;
         }
@@ -136,11 +137,12 @@ public class ClientWindow extends JFrame{
         carregarNotificacoes(usuario);
         JOptionPane.showMessageDialog(this, "Login realizado com sucesso para o usuário: " + usuario.getUsername());
     }
+
     private void carregarProdutos(Usuario usuario) {
         Iterator<Produto> produtos = blockingStub.getProdutos(usuario);
 
         new Thread(() -> {
-            while (produtos.hasNext()){
+            while (produtos.hasNext()) {
                 Produto produto = produtos.next();
                 tableModel.addRow(TableUtils.getProdutoColumns(produto));
                 comboBoxModel.addElement(produto);
@@ -151,7 +153,7 @@ public class ClientWindow extends JFrame{
     private void carregarNotificacoes(Usuario usuario) {
         new Thread(() -> {
             Iterator<Lance> lancesNotify = blockingStub.listenLances(usuario);
-            while (lancesNotify.hasNext()){
+            while (lancesNotify.hasNext()) {
                 Lance lance = lancesNotify.next();
 
                 for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -159,12 +161,15 @@ public class ClientWindow extends JFrame{
                     int id = lance.getProduto().getId();
 
                     if (id == idAtual) {
-                        tableModel.setValueAt(lance.getValor(), i, 4);
+                        tableModel.setValueAt(currency.format(lance.getValor()), i, 4);
                         tableModel.setValueAt(lance.getUsuario(), i, 5);
                         LocalDateTime dateTime = LocalDateTime.parse(lance.getDatetime());
                         tableModel.setValueAt(dateTimeFormatter.format(dateTime), i, 6);
                         tableModel.setValueAt("Não", i, 7);
-                        System.out.printf("O usuário %s realizou um lance no produto %s - valor: %s%n",lance.getUsuario(),lance.getProduto().getDescricao(),currency.format(lance.getValor()));
+                        System.out.printf("O usuário %s realizou um lance no produto %s - valor: %s%n",
+                                lance.getUsuario(),
+                                lance.getProduto().getDescricao(),
+                                currency.format(lance.getValor()));
                         break;
                     }
                 }
@@ -181,7 +186,10 @@ public class ClientWindow extends JFrame{
                     int id = lance.getProduto().getId();
                     if (id == idAtual) {
                         tableModel.setValueAt("Sim", i, 7);
-                        System.out.printf("O produto %s foi vendido para o usuário %s pela bagatela de %s%n", notify.getProduto().getDescricao(),notify.getUsuario(),currency.format(notify.getValor()));
+                        System.out.printf("O produto %s foi vendido para o usuário %s pela bagatela de %s%n",
+                                notify.getProduto().getDescricao(),
+                                notify.getUsuario(),
+                                currency.format(notify.getValor()));
                         break;
                     }
                 }
