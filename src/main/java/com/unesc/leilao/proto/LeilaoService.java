@@ -14,11 +14,24 @@ public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
 
     @Override
     public void login(Usuario request, StreamObserver<APIResponse> responseObserver) {
-        String message = "Usuário " + request.getUsername() + " conectado";
+        if (controller.getUsuario(request.getUsername()) != null) {
+            responseObserver.onNext(Response.notOk("Usuário já conectado"));
+            responseObserver.onCompleted();
+            return;
+        }
+
         controller.adicionarUsuario(request.getUsername());
+        String message = "Usuário " + request.getUsername() + " conectado";
         responseObserver.onNext(Response.ok(message));
         responseObserver.onCompleted();
         logger.info(message);
+    }
+
+    @Override
+    public void logout(Usuario request, StreamObserver<APIResponse> responseObserver) {
+        controller.removerUsuario(request.getUsername());
+        responseObserver.onNext(Response.ok("Usuário desconectado"));
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -28,6 +41,12 @@ public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
 
     @Override
     public void fazerLance(Lance request, StreamObserver<APIResponse> responseObserver) {
+        if (request.getValor() < request.getProduto().getValorMinimo()) {
+            responseObserver.onNext(Response.notOk("Lance não atingiu o valor mínimo"));
+            responseObserver.onCompleted();
+            return;
+        }
+
         controller.fazerLance(request);
         responseObserver.onNext(Response.ok("Lance registrado com sucesso."));
         responseObserver.onCompleted();

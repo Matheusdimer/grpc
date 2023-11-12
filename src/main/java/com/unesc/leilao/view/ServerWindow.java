@@ -18,7 +18,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ServerWindow extends JFrame {
 
-    private JPanel panel;
+    private JPanel panelPrincipal;
     private JTable table;
     private JTextField descricaoField;
     private JTextField valorField;
@@ -30,19 +30,21 @@ public class ServerWindow extends JFrame {
     public ServerWindow() {
         super("Painel de controle do leilão");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setContentPane(panel);
+        setContentPane(panelPrincipal);
         setSize(900, 600);
         setLocationRelativeTo(null);
         setVisible(true);
 
         MessageConsole messageConsole = new MessageConsole(logPane);
         messageConsole.redirectOut();
-        messageConsole.setMessageLines(20);
+        messageConsole.redirectErr();
+        messageConsole.setMessageLines(1000);
 
         table.setModel(tableModel);
         cadastrarProdutoButton.addActionListener(this::cadastrarProduto);
         controller.setOnProdutoCadastrado(this::onProdutoCadastrado);
         controller.setOnLance(this::onLance);
+        controller.setOnProdutoVendido(this::onProdutoVendido);
     }
 
     private void cadastrarProduto(ActionEvent event) {
@@ -95,5 +97,16 @@ public class ServerWindow extends JFrame {
 
     private void onProdutoCadastrado(Produto produto) {
         tableModel.addRow(TableUtils.getProdutoColumns(produto));
+    }
+
+    private void onProdutoVendido(Produto produto) {
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            int id = (int) tableModel.getValueAt(i, 0);
+
+            if (produto.getId() == id) {
+                tableModel.setValueAt("Sim", i, 7);
+                break;
+            }
+        }
     }
 }
