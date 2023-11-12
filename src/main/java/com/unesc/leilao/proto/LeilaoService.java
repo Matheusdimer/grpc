@@ -43,6 +43,12 @@ public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
     public void fazerLance(Lance request, StreamObserver<APIResponse> responseObserver) {
         Produto produto = controller.getProduto(request.getProduto().getId());
 
+        if (produto.getVendido()) {
+            responseObserver.onNext(Response.notOk("Produto já está vendido"));
+            responseObserver.onCompleted();
+            return;
+        }
+
         if (request.getValor() < produto.getValorMinimo()) {
             responseObserver.onNext(Response.notOk("Lance não atingiu o valor mínimo"));
             responseObserver.onCompleted();
