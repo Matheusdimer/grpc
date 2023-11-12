@@ -55,7 +55,7 @@ public class LeilaoService extends LeilaoGrpc.LeilaoImplBase {
             return;
         }
 
-        if (produto.hasUltimoLance() && request.getValor() < produto.getUltimoLance().getValor()) {
+        if (produto.hasUltimoLance() && request.getValor() <= produto.getUltimoLance().getValor()) {
             responseObserver.onNext(Response.notOk("Lance deve ter um valor maior que o último lance"));
             responseObserver.onCompleted();
             return;
