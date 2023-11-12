@@ -87,9 +87,7 @@ public class ClientWindow extends JFrame{
                     .setUsername(username)
                     .build();
 
-            CompletableFuture.runAsync(() -> {
-                fazerLogin(usuario);
-            });
+            CompletableFuture.runAsync(() -> fazerLogin(usuario));
         });
 
         lanceButton.addActionListener(e -> {
@@ -146,9 +144,6 @@ public class ClientWindow extends JFrame{
                 Produto produto = produtos.next();
                 tableModel.addRow(TableUtils.getProdutoColumns(produto));
                 comboBoxModel.addElement(produto);
-
-                Produto selectedItem = (Produto) comboBoxModel.getSelectedItem();
-
             }
         }).start();
     }
