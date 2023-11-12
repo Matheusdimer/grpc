@@ -69,11 +69,14 @@ public class ClientWindow extends JFrame{
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                APIResponse logout = blockingStub.logout(usuario);
-                if (!logout.getOk()){
-                    JOptionPane.showMessageDialog(ClientWindow.this, "Erro ao desconectar usuário. Por favor tente novamente!");
+                try {
+                    APIResponse logout = blockingStub.logout(usuario);
+                    if (!logout.getOk()){
+                        JOptionPane.showMessageDialog(ClientWindow.this, "Erro ao desconectar usuário. Por favor tente novamente!");
+                    }
+                } finally {
+                    dispose();
                 }
-                dispose();
             }
         });
 

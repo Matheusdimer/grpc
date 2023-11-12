@@ -1,20 +1,19 @@
 package com.unesc.leilao;
 
-import com.unesc.leilao.proto.*;
+import com.unesc.leilao.proto.LeilaoGrpc;
 import com.unesc.leilao.view.ClientWindow;
 import io.grpc.Grpc;
 import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class LeilaoClient {
     private static final Logger logger = Logger.getLogger(LeilaoClient.class.getName());
 
-    private static final String target = "localhost:9050";
+    private static String target = "localhost:9050";
 
     public static LeilaoGrpc.LeilaoBlockingStub buildClient() {
         logger.info("Iniciando conexão com o servidor " + target);
@@ -23,11 +22,14 @@ public class LeilaoClient {
         return LeilaoGrpc.newBlockingStub(channel);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        String text = JOptionPane.showInputDialog("Informe o endereço do servidor:");
 
-        String target = JOptionPane.showInputDialog("Informe o endereço do servidor:");
+        if (StringUtils.isNotBlank(text)) {
+            target = text;
+        }
+
         LeilaoGrpc.LeilaoBlockingStub blockingStub = buildClient();
-
-        ClientWindow clientWindow = new ClientWindow(blockingStub);
+        new ClientWindow(blockingStub);
     }
 }
