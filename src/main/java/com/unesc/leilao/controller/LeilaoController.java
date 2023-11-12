@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import static com.unesc.leilao.util.TableUtils.currency;
+
 public class LeilaoController {
 
     private static final Logger logger = Logger.getLogger(LeilaoController.class.getName());
@@ -185,6 +187,10 @@ public class LeilaoController {
                 .setUsuario(lance.getUsuario())
                 .build();
         notificarProdutoVendido(notificacaoProdutoVendido);
-        logger.info("Produto " + produto.getDescricao() + " vendido para " + lance.getUsuario());
+        logger.info(String.format("Produto %s vendido para %s por %s",
+                produto.getDescricao(),
+                lance.getUsuario(),
+                currency.format(lance.getValor())
+        ));
     }
 }
