@@ -5,6 +5,7 @@ import com.unesc.leilao.proto.NotificacaoProdutoVendido;
 import com.unesc.leilao.proto.Produto;
 import com.unesc.leilao.proto.Usuario;
 import com.unesc.leilao.util.TaskUtil;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.apache.commons.lang3.function.Consumers;
 
@@ -92,19 +93,19 @@ public class LeilaoController {
 
     public void notificarProdutoCadastrado(Produto produto) {
         usuariosConectados.forEach((username, usuarioConectado) ->
-                notifyObserver(usuarioConectado.getProdutosStream(), produto));
+                notifyObserver(usuarioConectado, usuarioConectado.getProdutosStream(), produto));
         CompletableFuture.runAsync(() -> onProdutoCadastrado.accept(produto));
     }
 
     public synchronized void notificarLance(Lance lance) {
         usuariosConectados.forEach((username, usuarioConectado) ->
-                notifyObserver(usuarioConectado.getNotificacaoLanceStream(), lance));
+                notifyObserver(usuarioConectado, usuarioConectado.getNotificacaoLanceStream(), lance));
         CompletableFuture.runAsync(() -> onLance.accept(lance));
     }
 
     public synchronized void notificarProdutoVendido(NotificacaoProdutoVendido notificacaoProdutoVendido) {
         usuariosConectados.forEach((username, usuarioConectado) ->
-                notifyObserver(usuarioConectado.getNotificacaoProdutoVendidoStream(), notificacaoProdutoVendido));
+                notifyObserver(usuarioConectado, usuarioConectado.getNotificacaoProdutoVendidoStream(), notificacaoProdutoVendido));
         CompletableFuture.runAsync(() -> onProdutoVendido.accept(notificacaoProdutoVendido.getProduto()));
     }
 
@@ -140,9 +141,13 @@ public class LeilaoController {
         System.err.println("Conexões encerradas");
     }
 
-    private <T> void notifyObserver(StreamObserver<T> streamObserver, T value) {
+    private <T> void notifyObserver(UsuarioConectado usuario, StreamObserver<T> streamObserver, T value) {
         if (streamObserver != null) {
-            streamObserver.onNext(value);
+            try {
+                streamObserver.onNext(value);
+            } catch (StatusRuntimeException exception) {
+                removerUsuario(usuario.getUsername());
+            }
         }
     }
 
