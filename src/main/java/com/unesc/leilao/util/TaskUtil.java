@@ -17,7 +17,10 @@ public class TaskUtil {
 
             while (System.currentTimeMillis() < end && !canceled.get()) {
             }
-            runnable.run();
+
+            if (!canceled.get()) {
+                runnable.run();
+            }
         });
         return () -> canceled.set(true);
     }
